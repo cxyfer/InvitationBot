@@ -174,24 +174,6 @@ pub async fn record_invite_use(
     Ok(())
 }
 
-pub async fn mark_invite_used(
-    pool: &Pool,
-    invite_id: &str,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        r#"
-        UPDATE invites 
-        SET is_used = TRUE
-        WHERE id = ? 
-        AND is_used = FALSE
-        "#,
-        invite_id
-    )
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
 pub async fn find_invite_by_code(
     pool: &Pool,
     discord_code: &str,
