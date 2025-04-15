@@ -107,7 +107,7 @@ commands:
       description: "這是您的 **{guild}** **私人**邀請連結。您邀請的對象將不會與您有任何關聯。請注意，您的匿名邀請次數已被消耗，請及時使用，以免邀請過期。"
       limits: "私人邀請限制"
       invites_per_days: "{days} 天內可建立 {count} 個私人邀請"
-      used_remaining: "已使用 {used} 次，剩餘 {remaining} 次"
+      used_remaining: "已使用 {used} 次，剩餘 {remaining} 次，本次邀請已被計入使用額度"
       footer: "🤫 此邀請為匿名，不會在排行榜上顯示您的身份，也不會將您與受邀者綁定"
 
 errors:
