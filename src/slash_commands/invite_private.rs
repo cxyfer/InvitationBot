@@ -148,7 +148,7 @@ pub async fn invite_private(ctx: Context<'_>) -> Result<(), Error> {
         locale,
         "commands.invite_private.success",
         guild_name,
-        private_limit - 1,
+        private_limit,
         used_private_invites + 1,
         bot_invite_url,
         guild.icon_url(),
