@@ -230,6 +230,7 @@ pub async fn get_invite_leaderboard(
         WHERE guild_id = ?
         AND created_at > datetime('now', ?)
         AND used_at IS NOT NULL
+        AND (is_private = 0 OR is_private IS NULL)
         GROUP BY creator_id
         ORDER BY invite_count DESC, creator_id ASC
         LIMIT 5
