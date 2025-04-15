@@ -50,6 +50,10 @@ Bot must have these permissions in the invite channel:
 echo "DATABASE_URL=sqlite:data/bot.db" > .env
 echo "CONFIG_PATH=data/config.yaml" >> .env
 
+# Set up the database
+sqlite3 data/bot.db < src/migrations/20240101000000_create_tables.sql
+sqlite3 data/bot.db < src/migrations/20240522000000_add_private_invite_usages_table.sql
+
 cargo run --release
 ```
 
