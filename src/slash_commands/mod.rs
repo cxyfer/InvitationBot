@@ -2,3 +2,4 @@ pub mod inviter;
 pub mod invites;
 pub mod invites_leaderboard;
 pub mod ping;
+pub mod invite_private; // Added new command module

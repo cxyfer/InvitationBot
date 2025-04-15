@@ -75,6 +75,41 @@ commands:
       title: "Invite Leaderboard - {guild}"
       footer: "🔥 Use /invites to get your invite link"
 
+  invite_private:
+    name: "invite-private"
+    description: "Create a private invite link (anonymous inviter)"
+    errors:
+      server_not_allowed:
+        title: "❌ Server Not Allowed"
+        description: "This server is not configured to use this bot"
+        footer: "Contact the bot administrator for access"
+      missing_permissions:
+        title: "❌ Missing Permissions"
+        description: "You don't have the required role to use the private invite command"
+        footer: "Contact a server administrator for access"
+      limit_reached:
+        title: "❌ Private Invite Limit Reached"
+        description: "You can only create {count} private invites in the past {days} days"
+        status: "Current Status"
+        used: "{used} used"
+        remaining: "{remaining} remaining"
+        footer: "Try again when your private invite limit resets"
+      join_date_not_found:
+        title: "❌ Join Date Not Found"
+        description: "Failed to fetch join date"
+        footer: "This is likely a Discord API error"
+      not_long_enough:
+        title: "❌ Not Long Enough"
+        description: "You must be in the server for at least {days} days to create a private invite"
+        footer: "Try again in {remaining} days"
+    success:
+      title: "🎫 New Private Invite Created"
+      description: "Here's your **private** invite link for **{guild}**. Your identity as the inviter is anonymous."
+      limits: "Private Invite Limits"
+      invites_per_days: "{count} private invites per {days} days"
+      used_remaining: "{used} used, {remaining} remaining"
+      footer: "🤫 This invite is anonymous and not linked to you in the leaderboard"
+
 server:
   running: "HTTP server running on {addr}"
 

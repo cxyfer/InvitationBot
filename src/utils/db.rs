@@ -191,6 +191,52 @@ pub async fn get_invite_leaderboard(
     .await
 }
 
+// --- Functions for Private Invites ---
+
+/// Records the usage of a private invite by a user in a specific guild.
+pub async fn record_private_invite_usage(
+    pool: &Pool,
+    guild_id: &str,
+    user_id: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "INSERT INTO private_invite_usages (user_id, guild_id, created_at) VALUES (?, ?, datetime('now'))",
+        user_id,
+        guild_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Counts how many times a user has used the private invite command in a specific guild within the last N days.
+pub async fn count_used_private_invites(
+    pool: &Pool,
+    user_id: &str,
+    guild_id: &str,
+    days: i32,
+) -> Result<i64, sqlx::Error> {
+    let days_str = format!("-{} days", days.max(0)); // Ensure days is non-negative
+    let count = sqlx::query_scalar!(
+        r#"
+        SELECT COUNT(*) as count
+        FROM private_invite_usages
+        WHERE user_id = ?
+        AND guild_id = ?
+        AND created_at > datetime('now', ?)
+        "#,
+        user_id,
+        guild_id,
+        days_str
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(count)
+}
+
+// --- End Functions for Private Invites ---
+
 #[cfg(test)]
 mod tests {
     use super::*;

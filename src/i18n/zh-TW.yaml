@@ -75,6 +75,41 @@ commands:
       title: "邀請排行榜 - {guild}"
       footer: "🔥 使用 /invites 取得你的邀請連結"
 
+  invite_private:
+    name: "invite-private"
+    description: "建立私人邀請連結（匿名邀請者）"
+    errors:
+      server_not_allowed:
+        title: "❌ 伺服器未授權"
+        description: "此伺服器未被設定使用此機器人"
+        footer: "請聯絡機器人管理員申請使用"
+      missing_permissions:
+        title: "❌ 權限不足"
+        description: "您沒有使用私人邀請指令的權限"
+        footer: "請聯絡伺服器管理員申請權限"
+      limit_reached:
+        title: "❌ 已達私人邀請上限"
+        description: "您在過去 {days} 天內只能建立 {count} 個私人邀請"
+        status: "目前狀態"
+        used: "已使用 {used} 次"
+        remaining: "剩餘 {remaining} 次"
+        footer: "請等待私人邀請限制重置後再試"
+      join_date_not_found:
+        title: "❌ 找不到用戶加入日期"
+        description: "無法取得用戶加入日期"
+        footer: "這可能是 Discord API 錯誤"
+      not_long_enough:
+        title: "❌ 加入時間不足"
+        description: "您必須在伺服器中至少待 {days} 天才能建立私人邀請"
+        footer: "請等待至少 {remaining} 天後再試"
+    success:
+      title: "🎫 已建立新私人邀請"
+      description: "這是您的 **{guild}** **私人**邀請連結。您的邀請者身份將保持匿名。"
+      limits: "私人邀請限制"
+      invites_per_days: "{days} 天內可建立 {count} 個私人邀請"
+      used_remaining: "已使用 {used} 次，剩餘 {remaining} 次"
+      footer: "🤫 此邀請為匿名，不會在排行榜上顯示您的身份"
+
 errors:
   command:
     title: "❌ 指令錯誤"

@@ -27,10 +27,16 @@ guilds:
           invite_limit:
             count: 10
             days: 30
+          private_invite_limit: # Optional: Limit for private invites for this role
+            count: 2
+            days: 30
         - id: "666777888999000"
           name: "Invite Manager"
           invite_limit:
             count: 2
+          # private_invite_limit: # Optional: If omitted or null, this role cannot use private invites
+          #   count: 1
+          #   days: 7
             days: 30
     - id: "987654321098765432"
       name: "Production Server"
@@ -40,3 +46,6 @@ guilds:
           invite_limit:
             count: 5
             days: 30
+          # private_invite_limit: # Optional
+          #   count: 1
+          #   days: 30

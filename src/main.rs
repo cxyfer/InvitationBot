@@ -93,6 +93,7 @@ async fn main() -> Result<(), Error> {
                 slash_commands::invites::invites(),
                 slash_commands::inviter::inviter(),
                 slash_commands::invites_leaderboard::invites_leaderboard(),
+                slash_commands::invite_private::invite_private(), // Added new command
             ],
             on_error: |error| Box::pin(on_error(error)),
             ..Default::default()

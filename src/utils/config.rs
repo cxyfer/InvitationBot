@@ -54,6 +54,7 @@ pub struct AllowedGuild {
 pub struct AllowedRole {
     pub id: String,
     pub invite_limit: InviteLimit,
+    pub private_invite_limit: Option<InviteLimit>, // Added for private invites
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
