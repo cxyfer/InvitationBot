@@ -1,4 +1,4 @@
-use crate::utils::config::{AllowedRole, InviteLimit}; // Import InviteLimit
+use crate::utils::config::InviteLimit; // Removed unused AllowedRole import
 use crate::{t, Context, Error};
 use chrono::{Duration, Utc};
 use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
@@ -76,7 +76,7 @@ pub async fn invite_private(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     // Validate member roles for private invite permissions
-    let (role_with_limit, private_limit) = match member.roles.iter().find_map(|role_id| {
+    let (_role_with_limit, private_limit) = match member.roles.iter().find_map(|role_id| { // Prefixed unused variable with _
         guild_config.allowed_roles.iter().find_map(|allowed_role| {
             if allowed_role.id == role_id.to_string() {
                 allowed_role.private_invite_limit.as_ref().map(|limit| (allowed_role, limit))
@@ -117,6 +117,16 @@ pub async fn invite_private(ctx: Context<'_>) -> Result<(), Error> {
 
     // Create invite link (without recording inviter in the main invites table)
     let invite_id = Uuid::new_v4().to_string();
+
+    // 創建私人邀請
+    crate::utils::db::create_invite(
+        &ctx.data().db,
+        &invite_id,
+        &guild_id.to_string(),
+        &ctx.author().id.to_string(),
+        true, // 設為私人邀請
+    )
+    .await?;
 
     // Record private invite usage (using placeholder for new db function)
     crate::utils::db::record_private_invite_usage(

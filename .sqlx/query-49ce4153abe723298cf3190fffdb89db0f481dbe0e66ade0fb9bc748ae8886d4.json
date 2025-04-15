@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO invites (\n            id, guild_id, creator_id, created_at, is_private\n        ) VALUES (?, ?, ?, datetime('now'), ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "49ce4153abe723298cf3190fffdb89db0f481dbe0e66ade0fb9bc748ae8886d4"
+}

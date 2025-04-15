@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO private_invite_usages (user_id, guild_id, created_at) VALUES (?, ?, datetime('now'))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "1aa531baffb8c417e2fc121f747001710f7d0564cacb35978e6bd853d97d31bc"
+}

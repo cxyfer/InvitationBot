@@ -101,6 +101,7 @@ pub async fn invites(ctx: Context<'_>) -> Result<(), Error> {
         &invite_id,
         &guild_id.to_string(),
         &ctx.author().id.to_string(),
+        false,
     )
     .await?;
 

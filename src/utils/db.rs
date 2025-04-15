@@ -22,14 +22,16 @@ pub async fn create_invite(
     invite_id: &str,
     guild_id: &str,
     creator_id: &str,
+    is_private: bool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO invites (
-            id, guild_id, creator_id, created_at
-        ) VALUES (?, ?, ?, datetime('now'))",
+            id, guild_id, creator_id, created_at, is_private
+        ) VALUES (?, ?, ?, datetime('now'), ?)",
         invite_id,
         guild_id,
-        creator_id
+        creator_id,
+        is_private
     )
     .execute(pool)
     .await?;
@@ -42,7 +44,7 @@ pub async fn get_unused_invite(
 ) -> Result<Option<InviteRecord>, sqlx::Error> {
     sqlx::query_as!(
         InviteRecord,
-        "SELECT guild_id, creator_id, discord_invite_code as code FROM invites WHERE id = ? AND used_at IS NULL",
+        "SELECT guild_id, creator_id, discord_invite_code as code, is_private FROM invites WHERE id = ? AND is_used = FALSE",
         invite_id
     )
     .fetch_optional(pool)
@@ -92,8 +94,9 @@ pub async fn count_used_invites(
 #[allow(dead_code)]
 pub struct InviteRecord {
     pub guild_id: String,
-    pub creator_id: String,   // Used for invite tracking and permissions
-    pub code: Option<String>, // Discord invite code, if already created
+    pub creator_id: String,       // Used for invite tracking and permissions
+    pub code: Option<String>,     // Discord invite code, if already created
+    pub is_private: Option<bool>, // Whether this is a private/anonymous invite
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -126,15 +129,62 @@ pub async fn record_invite_use(
     invite_id: &str,
     user_id: &str,
 ) -> Result<(), sqlx::Error> {
+    // 先查詢邀請是否為私人邀請
+    let is_private = sqlx::query_scalar!(
+        "SELECT is_private FROM invites WHERE id = ?",
+        invite_id
+    )
+    .fetch_optional(pool)
+    .await?
+    .flatten()
+    .unwrap_or(false);
+
+    if is_private {
+        // 如果是私人邀請，不記錄使用者
+        sqlx::query!(
+            r#"
+            UPDATE invites 
+            SET used_at = datetime('now'), 
+                is_used = TRUE
+            WHERE id = ? 
+            AND is_used = FALSE
+            "#,
+            invite_id
+        )
+        .execute(pool)
+        .await?;
+    } else {
+        // 如果不是私人邀請，記錄使用者
+        sqlx::query!(
+            r#"
+            UPDATE invites 
+            SET used_at = datetime('now'), 
+                used_by = ?, 
+                is_used = TRUE
+            WHERE id = ? 
+            AND used_at IS NULL
+            AND is_used = FALSE
+            "#,
+            user_id,
+            invite_id
+        )
+        .execute(pool)
+        .await?;
+    }
+    Ok(())
+}
+
+pub async fn mark_invite_used(
+    pool: &Pool,
+    invite_id: &str,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
         UPDATE invites 
-        SET used_at = datetime('now'), 
-            used_by = ? 
+        SET is_used = TRUE
         WHERE id = ? 
-        AND used_at IS NULL
+        AND is_used = FALSE
         "#,
-        user_id,
         invite_id
     )
     .execute(pool)
@@ -147,7 +197,7 @@ pub async fn find_invite_by_code(
     discord_code: &str,
 ) -> Result<Option<String>, sqlx::Error> {
     sqlx::query_scalar!(
-        "SELECT id FROM invites WHERE discord_invite_code = ? AND used_at IS NULL LIMIT 1",
+        "SELECT id FROM invites WHERE discord_invite_code = ? AND is_used = FALSE LIMIT 1",
         discord_code
     )
     .fetch_optional(pool)
@@ -256,7 +306,7 @@ mod tests {
         let creator_id = "987654321";
 
         // Test create invite
-        create_invite(&pool, &invite_id, guild_id, creator_id)
+        create_invite(&pool, &invite_id, guild_id, creator_id, false)
             .await
             .unwrap();
 
@@ -265,6 +315,35 @@ mod tests {
         assert_eq!(invite.guild_id, guild_id);
         assert_eq!(invite.creator_id, creator_id);
         assert!(invite.code.is_none());
+        assert_eq!(invite.is_private.unwrap_or(false), false);
+    }
+
+    #[tokio::test]
+    async fn test_private_invite() {
+        let pool = setup_test_db().await;
+        let invite_id = Uuid::new_v4().to_string();
+        let guild_id = "123456789";
+        let creator_id = "987654321";
+        let user_id = "111222333";
+
+        // Create private invite
+        create_invite(&pool, &invite_id, guild_id, creator_id, true)
+            .await
+            .unwrap();
+
+        // Test get unused invite
+        let invite = get_unused_invite(&pool, &invite_id).await.unwrap().unwrap();
+        assert_eq!(invite.guild_id, guild_id);
+        assert_eq!(invite.creator_id, creator_id);
+        assert!(invite.code.is_none());
+        assert_eq!(invite.is_private.unwrap_or(false), true);
+
+        // Mark as used
+        record_invite_use(&pool, &invite_id, user_id).await.unwrap();
+
+        // Verify invite is marked as used
+        let invite = get_unused_invite(&pool, &invite_id).await.unwrap();
+        assert!(invite.is_none());
     }
 
     #[tokio::test]
@@ -277,7 +356,7 @@ mod tests {
         // Create multiple invites
         for _ in 0..3 {
             let invite_id = Uuid::new_v4().to_string();
-            create_invite(&pool, &invite_id, guild_id, creator_id)
+            create_invite(&pool, &invite_id, guild_id, creator_id, false)
                 .await
                 .unwrap();
             record_invite_use(&pool, &invite_id, user_id).await.unwrap();
@@ -299,7 +378,7 @@ mod tests {
         let user_id = "111222333";
 
         // Create invite
-        create_invite(&pool, &invite_id, guild_id, creator_id)
+        create_invite(&pool, &invite_id, guild_id, creator_id, false)
             .await
             .unwrap();
 

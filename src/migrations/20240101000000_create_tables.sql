@@ -6,5 +6,7 @@ CREATE TABLE IF NOT EXISTS invites (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     used_at DATETIME,
     used_by TEXT,
-    discord_invite_code TEXT
+    discord_invite_code TEXT,
+    is_used BOOLEAN DEFAULT FALSE,
+    is_private BOOLEAN DEFAULT FALSE
 ); 

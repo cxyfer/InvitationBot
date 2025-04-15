@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id FROM invites WHERE discord_invite_code = ? AND used_at IS NULL LIMIT 1",
+  "query": "SELECT id FROM invites WHERE discord_invite_code = ? AND is_used = FALSE LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -16,5 +16,5 @@
       true
     ]
   },
-  "hash": "99459449269167a78ba63ac62a8db1fee3e3428126b6d6ccdd51a9c81b7d91c5"
+  "hash": "633bd7b3c422c193546de6445b7786284a522d826b71a8c10f844759b7a5acec"
 }

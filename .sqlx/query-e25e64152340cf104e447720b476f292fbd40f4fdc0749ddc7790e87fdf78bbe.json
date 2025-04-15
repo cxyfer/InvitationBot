@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE invites \n            SET used_at = datetime('now'), \n                used_by = ?, \n                is_used = TRUE\n            WHERE id = ? \n            AND used_at IS NULL\n            AND is_used = FALSE\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "e25e64152340cf104e447720b476f292fbd40f4fdc0749ddc7790e87fdf78bbe"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE invites \n        SET is_used = TRUE\n        WHERE id = ? \n        AND is_used = FALSE\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "e34245b2bfd5108af2c141cf5b07254fa7e4e3d9a888b735cfffd67560ce0993"
+}
