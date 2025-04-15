@@ -104,7 +104,7 @@ commands:
         footer: "請等待至少 {remaining} 天後再試"
     success:
       title: "🎫 已建立新私人邀請"
-      description: "這是您的 **{guild}** **私人**邀請連結。您邀請的對象將不會與您有任何關聯。"
+      description: "這是您的 **{guild}** **私人**邀請連結。您邀請的對象將不會與您有任何關聯。請注意，您的匿名邀請次數已被消耗，請及時使用，以免邀請過期。"
       limits: "私人邀請限制"
       invites_per_days: "{days} 天內可建立 {count} 個私人邀請"
       used_remaining: "已使用 {used} 次，剩餘 {remaining} 次"
