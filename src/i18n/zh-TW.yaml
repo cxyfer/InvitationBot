@@ -54,6 +54,10 @@ commands:
         title: "❌ 找不到用戶加入日期"
         description: "無法取得用戶加入日期"
         footer: "這可能是 Discord API 錯誤"
+    private:
+      title: "👤 匿名邀請"
+      description: "{user} 是透過私人（匿名）邀請加入的"
+      footer: "出於隱私考量，無法顯示邀請者信息"
     success:
       title: "👥 邀請資訊"
       user: "用戶"
@@ -74,6 +78,20 @@ commands:
     success:
       title: "邀請排行榜 - {guild}"
       footer: "🔥 使用 /invites 取得你的邀請連結"
+
+  admin_invites_leaderboard:
+    name: "admin-invites-leaderboard"
+    description: "查看包含私人邀請的完整邀請排行榜（僅限管理員）"
+    param_days: "要查看的天數（預設：30）"
+    errors:
+      no_invites:
+        title: "📊 管理員邀請排行榜"
+        description: "在過去 {days} 天內沒有邀請記錄"
+        footer: "請稍後再試"
+    success:
+      title: "管理員邀請排行榜 - {guild}"
+      includes_private: "此排行榜包含所有邀請（包括私人邀請）"
+      footer: "👁️ 僅管理員可見"
 
   invite_private:
     name: "invite-private"
@@ -104,11 +122,11 @@ commands:
         footer: "請等待至少 {remaining} 天後再試"
     success:
       title: "🎫 已建立新私人邀請"
-      description: "這是您的 **{guild}** **私人**邀請連結。您邀請的對象將不會與您有任何關聯。請注意，您的匿名邀請次數已被消耗，請及時使用，以免邀請過期。"
+      description: "這是您的 **{guild}** **私人**邀請連結。對於一般用戶來說，您邀請的對象將不會與您有任何關聯。"
       limits: "私人邀請限制"
       invites_per_days: "{days} 天內可建立 {count} 個私人邀請"
-      used_remaining: "已使用 {used} 次，剩餘 {remaining} 次，本次邀請已被計入使用額度"
-      footer: "🤫 此邀請為匿名，不會在排行榜上顯示您的身份，也不會將您與受邀者綁定"
+      used_remaining: "已使用 {used} 次，剩餘 {remaining} 次。"
+      footer: "⚠️ 請注意，所有邀請紀錄仍會被系統保存，管理員可於必要時查閱完整邀請歷史。"
 
 errors:
   command:

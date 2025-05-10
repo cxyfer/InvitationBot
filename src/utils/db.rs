@@ -112,7 +112,13 @@ pub async fn get_user_invite_info(
 ) -> Result<Option<InviteInfo>, sqlx::Error> {
     sqlx::query_as!(
         InviteInfo,
-        "SELECT creator_id, used_at, discord_invite_code
+        "SELECT 
+            CASE 
+                WHEN is_private = TRUE THEN NULL 
+                ELSE creator_id 
+            END as creator_id, 
+            used_at, 
+            discord_invite_code
          FROM invites 
          WHERE used_by = ? 
          AND used_at IS NOT NULL
@@ -129,48 +135,23 @@ pub async fn record_invite_use(
     invite_id: &str,
     user_id: &str,
 ) -> Result<(), sqlx::Error> {
-    // 先查詢邀請是否為私人邀請
-    let is_private = sqlx::query_scalar!(
-        "SELECT is_private FROM invites WHERE id = ?",
+    // 更新邀請，將其標記為已使用並記錄使用者
+    sqlx::query!(
+        r#"
+        UPDATE invites 
+        SET used_at = datetime('now'), 
+            used_by = ?, 
+            is_used = TRUE
+        WHERE id = ? 
+        AND used_at IS NULL
+        AND is_used = FALSE
+        "#,
+        user_id,
         invite_id
     )
-    .fetch_optional(pool)
-    .await?
-    .flatten()
-    .unwrap_or(false);
-
-    if is_private {
-        // 如果是私人邀請，不記錄使用者
-        sqlx::query!(
-            r#"
-            UPDATE invites 
-            SET used_at = datetime('now'), 
-                is_used = TRUE
-            WHERE id = ? 
-            AND is_used = FALSE
-            "#,
-            invite_id
-        )
-        .execute(pool)
-        .await?;
-    } else {
-        // 如果不是私人邀請，記錄使用者
-        sqlx::query!(
-            r#"
-            UPDATE invites 
-            SET used_at = datetime('now'), 
-                used_by = ?, 
-                is_used = TRUE
-            WHERE id = ? 
-            AND used_at IS NULL
-            AND is_used = FALSE
-            "#,
-            user_id,
-            invite_id
-        )
-        .execute(pool)
-        .await?;
-    }
+    .execute(pool)
+    .await?;
+    
     Ok(())
 }
 
@@ -216,6 +197,36 @@ pub async fn get_invite_leaderboard(
         GROUP BY creator_id
         ORDER BY invite_count DESC, creator_id ASC
         LIMIT 5
+        "#,
+        guild_id,
+        days_str
+    )
+    .fetch_all(pool)
+    .await
+}
+
+/// For admin use only - includes private invites in the leaderboard
+pub async fn get_admin_invite_leaderboard(
+    pool: &Pool,
+    guild_id: &str,
+    days: i32,
+) -> Result<Vec<InviteLeaderboardEntry>, sqlx::Error> {
+    // Ensure days is non-negative
+    let days = days.max(0);
+    let days_str = format!("-{} days", days);
+
+    sqlx::query_as!(
+        InviteLeaderboardEntry,
+        r#"
+        SELECT 
+            creator_id,
+            COUNT(*) as invite_count
+        FROM invites 
+        WHERE guild_id = ?
+        AND created_at > datetime('now', ?)
+        AND used_at IS NOT NULL
+        GROUP BY creator_id
+        ORDER BY invite_count DESC, creator_id ASC
         "#,
         guild_id,
         days_str

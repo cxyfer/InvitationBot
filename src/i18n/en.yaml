@@ -43,24 +43,32 @@ commands:
 
   inviter:
     name: "inviter"
-    description: "View who invited a user"
+    description: "Check who invited a user"
     param_user: "User to check"
     errors:
       no_record:
-        title: "❌ No Invite Record"
+        title: "❌ No Record Found"
         description: "No invite record found for {user}"
-        footer: "This user might have joined through other means"
+        footer: "This user may have joined through other means"
       invalid_user:
         title: "❌ Invalid User ID"
-        description: "Failed to fetch inviter information"
-        footer: "This is likely a database error"
+        description: "Unable to get inviter information"
+        footer: "This could be a database error"
+      join_date_not_found:
+        title: "❌ Join date not found"
+        description: "Unable to get user join date"
+        footer: "This could be a Discord API error"
+    private:
+      title: "👤 Anonymous Invite"
+      description: "{user} joined through a private (anonymous) invite"
+      footer: "Inviter information is hidden for privacy reasons"
     success:
-      title: "👥 Invite Information"
+      title: "👥 Invitation Info"
       user: "User"
       invited_by: "Invited by"
       date: "Date"
-      invite_code: "Invite Code"
-      footer: "🔍 Use /invites-leaderboard to see top inviters"
+      invite_code: "Invite code"
+      footer: "🔍 Use /invites-leaderboard to see the leaderboard"
 
   invites_leaderboard:
     name: "invites-leaderboard"
@@ -69,11 +77,25 @@ commands:
     errors:
       no_invites:
         title: "📊 Invite Leaderboard"
-        description: "No invites found in the past {days} days"
-        footer: "Try checking again later"
+        description: "No invite records in the past {days} days"
+        footer: "Please try again later"
     success:
       title: "Invite Leaderboard - {guild}"
       footer: "🔥 Use /invites to get your invite link"
+
+  admin_invites_leaderboard:
+    name: "admin-invites-leaderboard"
+    description: "View the complete invite leaderboard including private invites (Admin only)"
+    param_days: "Days to look back (default: 30)"
+    errors:
+      no_invites:
+        title: "📊 Admin Invite Leaderboard"
+        description: "No invite records in the past {days} days"
+        footer: "Please try again later"
+    success:
+      title: "Admin Invite Leaderboard - {guild}"
+      includes_private: "This leaderboard includes all invites (including private ones)"
+      footer: "👁️ Visible to admins only"
 
   invite_private:
     name: "invite-private"
@@ -104,11 +126,11 @@ commands:
         footer: "Try again in {remaining} days"
     success:
       title: "🎫 New Private Invite Created"
-      description: "Here's your **private** invite link for **{guild}**. Your identity as the inviter is anonymous."
+      description: "Here's your **private** invite link for **{guild}**. Your identity as the inviter is anonymous to regular users."
       limits: "Private Invite Limits"
       invites_per_days: "{count} private invites per {days} days"
-      used_remaining: "{used} used, {remaining} remaining"
-      footer: "🤫 This invite is anonymous and not linked to you in the leaderboard"
+      used_remaining: "{used} used, {remaining} remaining."
+      footer: "⚠️ Please note that all invite records are saved in the system. Administrators may access the complete invite history when necessary."
 
 server:
   running: "HTTP server running on {addr}"

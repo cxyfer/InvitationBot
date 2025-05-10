@@ -39,6 +39,27 @@ pub async fn inviter(
             }
         };
 
+    // 檢查是否為私人邀請（創建者ID為空）
+    if invite_info.creator_id.is_none() {
+        let mut params = HashMap::new();
+        params.insert("user", format!("<@{}>", user.id));
+
+        // 顯示私人邀請的訊息
+        let embed = CreateEmbed::default()
+            .title(t!(locale, "commands.inviter.private.title"))
+            .description(t!(locale, "commands.inviter.private.description", params))
+            .color(0x4CACEE)
+            .thumbnail(user.avatar_url().unwrap_or_default())
+            .footer(CreateEmbedFooter::new(t!(
+                locale,
+                "commands.inviter.private.footer"
+            )));
+
+        ctx.send(CreateReply::default().embed(embed).ephemeral(true))
+            .await?;
+        return Ok(());
+    }
+
     let creator = match invite_info.creator_id.unwrap().parse() {
         Ok(id) => ctx.http().get_user(id).await?,
         Err(_) => {

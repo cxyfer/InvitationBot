@@ -115,10 +115,10 @@ pub async fn invite_private(ctx: Context<'_>) -> Result<(), Error> {
         return Ok(());
     }
 
-    // Create invite link (without recording inviter in the main invites table)
+    // Create invite link (記錄邀請者，但標記為私人邀請)
     let invite_id = Uuid::new_v4().to_string();
 
-    // 創建私人邀請
+    // 創建私人邀請 - 在資料庫中記錄邀請者，但標記為私人邀請
     crate::utils::db::create_invite(
         &ctx.data().db,
         &invite_id,

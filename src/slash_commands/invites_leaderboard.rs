@@ -75,3 +75,80 @@ pub async fn invites_leaderboard(
 
     Ok(())
 }
+
+/// View the complete invite leaderboard including private invites (Admin only)
+#[poise::command(slash_command, guild_only, default_member_permissions = "ADMINISTRATOR")]
+pub async fn admin_invites_leaderboard(
+    ctx: Context<'_>,
+    #[description = "Days to look back (default: 30)"] days: Option<i32>,
+) -> Result<(), Error> {
+    let guild_id = ctx.guild_id().unwrap();
+    let guild = ctx.guild().unwrap().clone();
+    let locale = ctx.data().config.get_guild_locale(&guild_id.to_string());
+    let days = days.unwrap_or(30);
+
+    let entries =
+        crate::utils::db::get_admin_invite_leaderboard(&ctx.data().db, &guild_id.to_string(), days)
+            .await?;
+
+    if entries.is_empty() {
+        let mut params = HashMap::new();
+        params.insert("days", days.to_string());
+
+        let embed = CreateEmbed::default()
+            .title(t!(
+                locale,
+                "commands.admin_invites_leaderboard.errors.no_invites.title"
+            ))
+            .description(t!(
+                locale,
+                "commands.admin_invites_leaderboard.errors.no_invites.description",
+                params
+            ))
+            .color(0xFF3333)
+            .footer(CreateEmbedFooter::new(t!(
+                locale,
+                "commands.admin_invites_leaderboard.errors.no_invites.footer"
+            )));
+
+        let reply = CreateReply::default().embed(embed).ephemeral(true);
+        ctx.send(reply).await?;
+        return Ok(());
+    }
+
+    let mut description = String::new();
+    for (index, entry) in entries.iter().enumerate() {
+        description.push_str(&format!(
+            "**#{} →** <@{}> [{} invites]\n\n",
+            index + 1,
+            entry.creator_id,
+            entry.invite_count
+        ));
+    }
+
+    let mut params = HashMap::new();
+    params.insert("guild", guild.name.clone());
+
+    let embed = CreateEmbed::default()
+        .title(t!(
+            locale,
+            "commands.admin_invites_leaderboard.success.title",
+            params
+        ))
+        .description(format!(
+            "**{}**\n\n{}",
+            t!(locale, "commands.admin_invites_leaderboard.success.includes_private"),
+            description
+        ))
+        .color(0x4CACEE)
+        .thumbnail(guild.icon_url().unwrap_or_default())
+        .footer(CreateEmbedFooter::new(t!(
+            locale,
+            "commands.admin_invites_leaderboard.success.footer"
+        )));
+
+    let reply = CreateReply::default().embed(embed).ephemeral(true);
+    ctx.send(reply).await?;
+
+    Ok(())
+}
